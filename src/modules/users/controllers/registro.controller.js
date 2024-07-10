@@ -157,88 +157,51 @@ module.exports = {
 //       });
 //     }
 //   },
-// 
-//   joinToOrganization: async (req, res) => {
-//     try {
-//       const { code } = req.body;
-//       const id_user = req.id_user;
-//       let response = 0;
-//       const myConnection = pool.connection(constants.DATABASE);
-//       myConnection.getConnection(async function (err, connection) {
-//         if (err) {
-//           console.log(err);
-//           return res.status(errors.errorConnection.code).json({
-//             ok: false,
-//             message: errors.errorConnection.message,
-//           });
-//         }
-//         response = await permissionAny(id_user, connection);
-//         if (response[0]) {
-//           response = await searchOrganization(code, connection);
-//           if (response[0]) {
-//             response = await addUserToOrganization(
-//               response[2],
-//               id_user,
-//               connection
-//             );
-//           }
-//         }
-// 
-//         connection.release();
-//         myConnection.end();
-//         return res.status(response[1].code).json({
-//           ok: response[0],
-//           message: response[1].message,
-//           data: response[2],
-//         });
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       return res.status(errors.errorServer.code).json({
-//         ok: false,
-//         message: errors.errorServer.message,
-//       });
-//     }
-//   },
-// 
-//   changeStatusAccountUser: async (req, res) => {
-//     try {
-//       let { id_organization_user, id_status } = req.body;
-//       const id_user = req.id_user;
-//       console.log(id_organization_user, id_status);
-//       const myConnection = pool.connection(constants.DATABASE);
-//       myConnection.getConnection(async function (err, connection) {
-//         if (err) {
-//           console.log(err);
-//           return res.status(errors.errorConnection.code).json({
-//             ok: false,
-//             message: errors.errorConnection.message,
-//           });
-//         }
-//         let response = await permissionAny(id_user, connection);
-//         if (response[0]) {
-//           response = await updateRecord(
-//             { id_status },
-//             tables.tables.Organizations_Users.name,
-//             id_organization_user,
-//             connection
-//           );
-//         }
-//         console.log(response);
-//         connection.release();
-//         myConnection.end();
-//         return res.status(response[1].code).json({
-//           ok: response[0],
-//           message: response[1].message,
-//           data: response[2],
-//         });
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       return res.status(errors.errorServer.code).json({
-//         ok: false,
-//         message: errors.errorServer.message,
-//       });
-//     }
-//   },
+
+
+  changeStatusClient: async (req, res) => {
+    try {
+      id_cliente = req.id_cliente
+      console.log( id_cliente, estatus );
+
+      const myConnection = pool.connection(constants.DATABASE);
+      myConnection.getConnection(async function (err, connection) {
+        if (err) {
+          console.log(err);
+          return res.status(errors.errorConnection.code).json({
+            ok: false,
+            message: errors.errorConnection.message,
+          });
+        }
+        response = await readAllRecord(
+            `UPDATE ccamigos_congreso-musicos.ClientesRegistros SET estatus = '1' WHERE (id_cliente = ${id_cliente})`,
+            connection
+        );
+
+       console.log(response);
+
+        // response = await updateRecord(
+        //   tables.tables.Organizations_Users.name,
+        //   id_organization_user,
+        //   connection
+        // );
+        
+        console.log(response);
+        connection.release();
+        myConnection.end();
+
+        return res.status(response[1].code).json({
+          ok: response[0],
+          message: response[1].message,
+          data: response[2],
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(errors.errorServer.code).json({
+        ok: false,
+        message: errors.errorServer.message,
+      });
+    }
+  },
 };
