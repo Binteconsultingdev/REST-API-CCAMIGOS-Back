@@ -6,9 +6,8 @@ module.exports = {
     Organizations: {
       name: "Organizations",
     },
-
-    Organizations_Users: {
-      name: "Organizations_Users",
+    ClientesRegistros: {
+      name: "ClientesRegistros",
     },
     Songs: {
       name: "Songs",
