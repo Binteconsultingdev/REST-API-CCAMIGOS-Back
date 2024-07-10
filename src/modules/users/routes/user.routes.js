@@ -8,7 +8,7 @@ const {
 } = require("../controllers/user.controller.js");
 const { validateJWT } = require("../../../common/middlewares/validate-jwt.js");
 const router = Router();
-router.get("/:id_organization", [validateJWT], getUsers);
+router.get("/", getUsers);
 router.post("/", addUser); // crear usuario
 router.post("/account", addAccountUser);
 router.post("/join", [validateJWT], joinToOrganization);

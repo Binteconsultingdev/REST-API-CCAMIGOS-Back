@@ -107,17 +107,7 @@ module.exports = {
             };
             user.password = bcrypt.hashSync(password, salt);
             response = await createRecord(user, table, connection);
-            // if (response[0]) {
-            //   const create_user = {
-            //     id_user: response[2],
-            //     id_rol,
-            //   };
-            //   responseAux = await createRecord(
-            //     create_user,
-            //     tables.tables.Organizations_Users.name,
-            //     connection
-            //   );
-            // }
+
           } else {
             response[1] = errors.errorRecordAlredyExists;
           }
@@ -142,10 +132,8 @@ module.exports = {
   },
   getUsers: async (req, res) => {
     try {
-      const { id_organization } = req.params;
-      const id_user = req.id_user;
       let response = 0;
-      let query = "";
+
       const myConnection = pool.connection(constants.DATABASE);
       myConnection.getConnection(async function (err, connection) {
         if (err) {
@@ -155,12 +143,13 @@ module.exports = {
             message: errors.errorConnection.message,
           });
         }
-        response = await permissionAny(id_user, connection);
-        if (response[0]) {
-          query = `SELECT ${table}.*, ${tables.tables.Organizations_Users.name}.id_status as id_status, ${tables.tables.Organizations_Users.name}.id as id_organization_user, ${tables.tables.Rols.name}.label as rol FROM ${tables.tables.Organizations_Users.name} INNER JOIN ${table} ON ${table}.id =  ${tables.tables.Organizations_Users.name}.id_user INNER JOIN ${tables.tables.Rols.name} ON ${tables.tables.Rols.name}.id = ${tables.tables.Organizations_Users.name}.id_rol WHERE ${tables.tables.Organizations_Users.name}.id_organization = '${id_organization}'`;
-          response = await readAllRecord(query, connection);
-        }
+        response = await readAllRecord(
+          'SELECT * FROM Users WHERE id_rol = 3 or id_rol = 2 ',
+          connection
+        );
+        
         console.log(response);
+        
         connection.release();
         myConnection.end();
         return res.status(response[1].code).json({
