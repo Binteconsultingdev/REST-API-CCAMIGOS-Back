@@ -11,8 +11,8 @@ const { validatePassword } = require("../common/functions");
 module.exports = {
   login: async (req, res) => {
     try {
-      const { correo, password } = req.body;
-      console.log(correo, password);
+      const { email, password } = req.body;
+      console.log(email, password);
       let response = 0;
       let responseAux = 0;
 
@@ -25,7 +25,7 @@ module.exports = {
           });
         }
         response = await readAllRecord(
-          `SELECT * FROM Users WHERE  correo = '${correo}'`,
+          `SELECT * FROM Users WHERE  email = '${email}'`,
           connection
         );
         console.log(response);
@@ -79,26 +79,8 @@ module.exports = {
           connection
         );
         if (response[2].length > 0) {
-          responseAux = await readAllRecord(
-            `SELECT  ${tables.tables.Organizations.name}.*, ${tables.tables.Organizations_Users.name}.id as id_organization_user FROM ${tables.tables.Organizations_Users.name} INNER JOIN ${tables.tables.Organizations.name} ON ${tables.tables.Organizations.name}.id = ${tables.tables.Organizations_Users.name}.id_organization WHERE ${tables.tables.Organizations_Users.name}.id_status = 1 AND ${tables.tables.Organizations_Users.name}.id_user = ${response[2][0].id}`,
-            connection
-          );
-          console.log(responseAux);
-          response[2][0].organizations = responseAux[2];
-          responseAux = await readAllRecord(
-            `SELECT  ${tables.tables.Skills.name}.* FROM ${tables.tables.Users_Skills.name} INNER JOIN ${tables.tables.Skills.name} ON ${tables.tables.Skills.name}.id = ${tables.tables.Users_Skills.name}.id_skill WHERE ${tables.tables.Users_Skills.name}.id_status = 1 AND ${tables.tables.Users_Skills.name}.id_user = ${response[2][0].id}`,
-            connection
-          );
-          response[2][0].skills = responseAux[2];
-          if (response[2][0].organizations.length > 0) {
-            response[2][0].id_organization_user =
-              response[2][0].organizations[0].id_organization_user;
-            response[2][0].id_organization = response[2][0].organizations[0].id;
-          } else {
-            response[2][0].id_organization_user = 0;
-            response[2][0].id_organization = 0;
-          }
           token = await generateJWT(response[2][0].id);
+          
         } else {
           response[1] = errors.errorNotFound;
         }

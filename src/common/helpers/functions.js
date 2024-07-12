@@ -99,6 +99,7 @@ module.exports = {
       console.log(query);
       connection.query(query, async (error, results) => {
         if (error) {
+          console.log(error);
           resolve([false, errors.errorDataBase, 0]);
         } else {
           if (results.length > 0) {

@@ -1,16 +1,15 @@
 const { Router } = require("express");
 const {
-  addUser,
   getUsers,
-  changeStatusAccountUser,
-  joinToOrganization,
-  addAccountUser,
+  updateUser,
 } = require("../controllers/user.controller.js");
 const { validateJWT } = require("../../../common/middlewares/validate-jwt.js");
+
 const router = Router();
-router.get("/", getUsers);
-router.post("/", addUser); // crear usuario
-router.post("/account", addAccountUser);
-router.post("/join", [validateJWT], joinToOrganization);
-router.put("/status", [validateJWT], changeStatusAccountUser);
+
+
+router.get("/", getUsers);  // crear usuario
+router.put("/", updateUser); 
+
+
 module.exports = router;

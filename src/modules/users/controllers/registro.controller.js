@@ -7,6 +7,9 @@ const constants = require("../../../common/helpers/constants/constants");
 const {
   readAllRecord,
   createRecord,
+  getCurrentDate,
+  readRecord,
+  updateRecord
 } = require("../../../common/helpers/functions");
 const tables = require("../../../common/helpers/constants/tables");
 const { response } = require("express");
@@ -43,7 +46,7 @@ module.exports = {
             iglesia, 
             email, 
             telefono, 
-            id_instrumento: instrumento, 
+            instrumento 
         };
         response = await createRecord(client, table, connection);
 
@@ -107,62 +110,9 @@ module.exports = {
       });
     }
   },
-// 
-//   updateUser: async (req, res) => {
-//     try {
-//       let { name } = req.body;
-//       const id_user = req.id_user;
-// 
-//       const current_date = getCurrentDate();
-//       const myConnection = pool.connection(constants.DATABASE);
-//       myConnection.getConnection(async function (err, connection) {
-//         if (err) {
-//           console.log(err);
-//           return res.status(errors.errorConnection.code).json({
-//             ok: false,
-//             message: errors.errorConnection.message,
-//           });
-//         }
-//         response = await permissionAny(id_user, connection);
-//         if (response[0]) {
-//           const response = await updateRecord(
-//             { name },
-//             table,
-//             id_user,
-//             connection
-//           );
-//           if (response[0]) {
-//             const responseFiles = await uploadFilesBySong(
-//               req.files,
-//               id_organization,
-//               id_song,
-//               connection
-//             );
-//             console.log(responseFiles);
-//           }
-//         }
-//         connection.release();
-//         myConnection.end();
-//         return res.status(response[1].code).json({
-//           ok: response[0],
-//           message: response[1].message,
-//           data: response[2],
-//         });
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       return res.status(errors.errorServer.code).json({
-//         ok: false,
-//         message: errors.errorServer.message,
-//       });
-//     }
-//   },
-
-
-  changeStatusClient: async (req, res) => {
+  getInstrument: async (req, res) => {
     try {
-      id_cliente = req.id_cliente
-      console.log( id_cliente, estatus );
+      let response = 0;
 
       const myConnection = pool.connection(constants.DATABASE);
       myConnection.getConnection(async function (err, connection) {
@@ -174,17 +124,134 @@ module.exports = {
           });
         }
         response = await readAllRecord(
-            `UPDATE ccamigos_congreso-musicos.ClientesRegistros SET estatus = '1' WHERE (id_cliente = ${id_cliente})`,
+            'SELECT * FROM `ccamigos_congreso-musicos`.Cat_instrumentos',
             connection
         );
 
-       console.log(response);
+        console.log(response);
 
-        // response = await updateRecord(
-        //   tables.tables.Organizations_Users.name,
-        //   id_organization_user,
-        //   connection
-        // );
+        connection.release();
+        myConnection.end();
+
+        return res.status(response[1].code).json({
+          ok: response[0],
+          message: response[1].message,
+          data: response[2],
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(errors.errorServer.code).json({
+        ok: false,
+        message: errors.errorServer.message,
+      });
+    }
+  },
+
+  actualizarUsuario: async(req, res) => {
+  try {
+    const { nombre, email, password } = req.body;
+    let nuevoPassword = null
+
+    if(!password.length === 0){
+      const salt = await bcrypt.genSalt(10);
+      nuevoPassword = await bcrypt.hash(password, salt);
+    }
+
+    // Query SQL para actualizar el usuario
+    // const sql = `
+    //   UPDATE Users
+    //   SET 
+    //   username = ${} 
+    //   email = ${}
+    //   WHERE id = ${}
+    // `;
+
+    // Ejecutar la consulta SQL
+    const [result] = await db.execute(sql, [nuevoNombre, nuevoEmail, usuarioId]);
+    
+    // Verificar si se actualizó correctamente
+    if (result.affectedRows > 0) {
+      console.log(`Usuario con ID ${usuarioId} actualizado correctamente.`);
+      return true;
+    } else {
+      console.log(`No se encontró ningún usuario con ID ${usuarioId} para actualizar.`);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error.message);
+    throw error;
+  }
+},
+  updateUser: async (req, res) => {
+    try {
+      let { nombre, edad, iglesia, email, telefono, instrumento } = req.body;
+
+      const current_date = getCurrentDate();
+      const myConnection = pool.connection(constants.DATABASE);
+      myConnection.getConnection(async function (err, connection) {
+        if (err) {
+          console.log(err);
+          return res.status(errors.errorConnection.code).json({
+            ok: false,
+            message: errors.errorConnection.message,
+          });
+        }
+
+        if (response[0]) {
+          const response = await updateRecord(
+            { nombre, edad, iglesia, email, telefono, instrumento },
+            table,
+            id_cliente,
+            connection
+          );
+
+          console.log(response);
+        }
+        connection.release();
+        myConnection.end();
+        return res.status(response[1].code).json({
+          ok: response[0],
+          message: response[1].message,
+          data: response[2],
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(errors.errorServer.code).json({
+        ok: false,
+        message: errors.errorServer.message,
+      });
+    }
+  },
+
+
+  changeStatusClient: async (req, res) => {
+    try {
+      const { id_cliente } = req.params;
+      let estatus = 0
+      let response = 0
+      console.log( id_cliente, estatus );
+
+      const myConnection = pool.connection(constants.DATABASE);
+      myConnection.getConnection(async function (err, connection) {
+        if (err) {
+          console.log(err);
+          return res.status(errors.errorConnection.code).json({
+            ok: false,
+            message: errors.errorConnection.message,
+          });
+        }        
+        console.log(response);
+        response = await readRecord(table, id_cliente, connection)
+        if(response[0]){
+          if(response[2].estatus === 1){
+            estatus = 0
+          }else if (response[2].estatus === 0){
+            estatus = 1
+          }
+          response = await updateRecord({estatus}, table, id_cliente, connection)
+        }
         
         console.log(response);
         connection.release();

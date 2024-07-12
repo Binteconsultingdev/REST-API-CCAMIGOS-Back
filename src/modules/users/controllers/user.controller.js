@@ -169,7 +169,8 @@ module.exports = {
 
   updateUser: async (req, res) => {
     try {
-      let { name } = req.body;
+      let { name, email, password } = req.body;
+      console.log(email, password);
       const id_user = req.id_user;
 
       const current_date = getCurrentDate();
@@ -185,7 +186,7 @@ module.exports = {
         response = await permissionAny(id_user, connection);
         if (response[0]) {
           const response = await updateRecord(
-            { name },
+            { name, email, password },
             table,
             id_user,
             connection
