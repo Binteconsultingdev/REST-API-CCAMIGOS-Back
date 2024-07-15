@@ -9,20 +9,24 @@ const {
   createRecord,
   getCurrentDate,
   readRecord,
-  updateRecord
+  updateRecord,
+  uploadFile
 } = require("../../../common/helpers/functions");
 const tables = require("../../../common/helpers/constants/tables");
 const { response } = require("express");
+const { uploadPay } = require("../common/functions");
 
 const table = tables.tables.ClientesRegistros.name;
 
 module.exports = {
   addClient: async (req, res) => {
     try {
-      const { nombre, edad, iglesia, email, telefono, instrumento } = req.body;
-      console.log(nombre, edad, iglesia, email, telefono, instrumento);
+      const { nombre, edad, iglesia, email, telefono, id_instrumento } = req.body;
+      console.log(nombre, edad, iglesia, email, telefono, id_instrumento);
       let response = 0;
       let responseAux = 0;
+
+      console.log(req.files['file'])
 
       const myConnection = pool.connection(constants.DATABASE);
       myConnection.getConnection(async function (err, connection) {
@@ -33,25 +37,30 @@ module.exports = {
           });
         }
 
-        response = await readAllRecord(
-            `SELECT *  FROM ClientesRegistros WHERE email = '${email}'`,
-            connection
-        );
+        // response = await readAllRecord(
+        //     `SELECT *  FROM ClientesRegistros WHERE email = '${email}'`,
+        //     connection
+        // );
 
-        if (response[2].length == 0) {
-            console.log(response);
+        // if (!!req.body.length) {
+        //   console.log(response);
         const client = {
-            nombre, 
-            edad, 
-            iglesia, 
-            email, 
-            telefono, 
-            instrumento 
+          nombre, 
+          edad, 
+          iglesia, 
+          email, 
+          telefono, 
+          id_instrumento,
+          // ruta_pago
         };
-        response = await createRecord(client, table, connection);
 
-        } else {
-        response[1] = errors.errorRecordAlredyExists;
+        response = await createRecord(client, table, connection);
+        if(response[0]){
+          response = await uploadPay(req.files, response[2], connection)
+        }
+
+        else {
+          response[1] = errors.errorToSendData;
         }
 
         connection.release();
@@ -73,7 +82,7 @@ module.exports = {
     }
   },
 
-  getClient: async (req, res) => {
+  getClients: async (req, res) => {
     try {
       let response = 0;
 
@@ -87,7 +96,7 @@ module.exports = {
           });
         }
         response = await readAllRecord(
-            'SELECT * FROM `ccamigos_congreso-musicos`.ClientesRegistros WHERE estatus = 0',
+            'SELECT * FROM `ccamigos_congreso-musicos`.ClientesRegistros JOIN Cat_instrumentos ON ClientesRegistros.id_instrumento = Cat_instrumentos.id ',
             connection
         );
 

@@ -16,11 +16,11 @@ module.exports = {
 
   uploadFile: async (file, type, folder, server, name) => {
     return new Promise(async function (resolve, reject) {
-      console.log(name);
+      console.log(name, server);
       const fileBuffer = Buffer.from(file.data);
       const formData = new FormData();
       formData.append("file", fileBuffer, {
-        filename: file.name,
+        filename: name,
         contentType: file.mimetype,
       });
       formData.append("bucket_name", type);

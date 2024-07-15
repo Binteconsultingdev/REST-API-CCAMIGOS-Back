@@ -8,7 +8,9 @@ const {
   readAllRecord,
   updateRecord,
   createRecord,
+  uploadFile,
 } = require("../../../common/helpers/functions");
+const constants = require("../../../common/helpers/constants/constants");
 
 module.exports = {
   validatePassword: async (user, password) => {
@@ -83,6 +85,46 @@ module.exports = {
       } catch (err) {
         console.log(err);
         resolve([false, errors.errorJoinOrganization, 0]);
+      }
+    });
+  },
+
+  uploadPay: async (files, id_client, connection) => {
+    return new Promise(async function (resolve, reject) {
+      try {
+        let ruta_pago = '';
+        let response = 0;
+        if (files != null) {
+          if (files["file"]) {
+            response = await uploadFile(
+              files["file"],
+              "Clientes",
+              id_client,
+              `https://nyc3.digitaloceanspaces.com/sgp-web/${constants.SERVER_FILES}/`,
+              `pago-${id_client}`
+            );
+            if (response[0]) {
+              ruta_pago = response[2];
+            }
+          }
+          response = await updateRecord(
+            { ruta_pago },
+            tables.tables.ClientesRegistros.name,
+            id_client,
+            connection
+          );
+          if (response[0]) {
+            resolve([true, success.successCreate, id_client]);
+          } else {
+            resolve([false, errors.errorUploadFile, id_client]);
+          }
+        } else {
+          console.log("SIN ARCHIVOS");
+          resolve([true, success.successUpdate, id_user]);
+        }
+      } catch (error) {
+        console.log(error);
+        resolve([false, errors.errorUploadFile, id_user]);
       }
     });
   },

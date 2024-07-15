@@ -95,6 +95,10 @@ module.exports = {
       code: 404,
       message: "EL REGISTRO YA EXISTE",
     },
+    errorToSendData: {
+      code: 404,
+      message: "ERROR AL MANDAR LOS DATOS",
+    },
     errorFileNotFound: {
       code: 404,
       message: "EL ARCHIVO NO FUE ENVIADO CORRECTAMENTE",
